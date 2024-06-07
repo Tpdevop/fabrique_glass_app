@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, prefer_interpolation_to_compose_strings, avoid_print
+// ignore_for_file: prefer_const_constructors, prefer_interpolation_to_compose_strings, avoid_print, constant_identifier_names
 
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:mailer/mailer.dart';
@@ -25,7 +25,7 @@ class MongoDatabase {
     final collection = db.collection(COLLECTION_NAME);
     final user = await collection.findOne(mongo.where.eq('email', email).eq(
         'pwd',
-        password)); // Assurez-vous que le champ du mot de passe est 'pwd'
+        int.parse(password))); // Assurez-vous que le champ du mot de passe est 'pwd'
 
     await closeDb(db);
     return user !=

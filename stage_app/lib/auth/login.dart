@@ -34,7 +34,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       setState(() {
         _isLoading = false;
       });
-
       if (authenticated) {
         Navigator.pushReplacement(
           context,
@@ -56,6 +55,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       SnackBar(
         content: Text(message),
         backgroundColor: Colors.red,
+        margin: EdgeInsetsDirectional.symmetric(vertical: 25.0),
       ),
     );
   }
@@ -94,7 +94,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
               ),
             ),
           ),
-          // Main Content
           Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
