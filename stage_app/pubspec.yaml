@@ -37,8 +37,10 @@ dependencies:
   cupertino_icons: ^1.0.6
   mongo_dart: ^0.10.2
   flutter_secure_storage: ^4.2.1
-  http: ^1.2.1
+  http: 1.2.1
   mailer: ^6.1.0
+  google_fonts: ^6.2.1
+  carousel_slider: ^4.2.1
 
 dev_dependencies:
   flutter_test:

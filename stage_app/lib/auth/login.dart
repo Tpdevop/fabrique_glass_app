@@ -1,5 +1,4 @@
-// ignore_for_file: prefer_const_constructors, use_build_context_synchronously, use_key_in_widget_constructors, library_private_types_in_public_api, deprecated_member_use, unused_element
-
+// login_page.dart
 import 'package:flutter/material.dart';
 import '../data/mongo_database.dart';
 import '../screens/home_page.dart';
@@ -9,7 +8,7 @@ class LoginPage extends StatefulWidget {
   _LoginPageState createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
+class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
@@ -29,16 +28,17 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     });
 
     try {
-      final authenticated = await MongoDatabase.login(email, password);
+      final user = await MongoDatabase.login(email, password);
 
       setState(() {
         _isLoading = false;
       });
-
-      if (authenticated) {
+      if (user != null) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => HomePage()),
+          MaterialPageRoute(
+            builder: (context) => HomePage(userType: user['type'],userEmail: user['email']),
+          ),
         );
       } else {
         _showSnackBar('Email ou mot de passe incorrect.');
@@ -56,6 +56,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       SnackBar(
         content: Text(message),
         backgroundColor: Colors.red,
+        margin: EdgeInsetsDirectional.symmetric(vertical: 25.0),
       ),
     );
   }
@@ -69,10 +70,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
         backgroundColor: Colors.blue.shade800,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: Colors.white,
-          ),
+          icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -80,7 +78,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       ),
       body: Stack(
         children: [
-          //Animated Gradient Background
+          // Animated Gradient Background
           AnimatedContainer(
             duration: Duration(seconds: 7),
             onEnd: () {
@@ -94,7 +92,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
               ),
             ),
           ),
-          // Main Content
           Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
@@ -133,9 +130,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                           obscureText: _obscurePassword,
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _obscurePassword
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
+                              _obscurePassword ? Icons.visibility : Icons.visibility_off,
                               color: Colors.blue,
                             ),
                             onPressed: () {
@@ -151,8 +146,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                           child: _isLoading
                               ? CircularProgressIndicator(
                                   key: ValueKey<int>(1),
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.blue),
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
                                 )
                               : _buildLoginButton(),
                         ),
@@ -217,10 +211,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       style: ElevatedButton.styleFrom(
         foregroundColor: Colors.white,
         backgroundColor: Colors.blue,
-        padding: EdgeInsets.symmetric(
-          vertical: 16.0,
-          horizontal: 32.0,
-        ),
+        padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(25.0),
         ),
@@ -242,8 +233,10 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildTextButton(
-      {required String label, required VoidCallback onPressed}) {
+  Widget _buildTextButton({
+    required String label,
+    required VoidCallback onPressed,
+  }) {
     return TextButton(
       style: TextButton.styleFrom(
         foregroundColor: Colors.blue,

@@ -1,20 +1,24 @@
-// ignore_for_file: prefer_const_constructors
-
+// home_page.dart
 import 'package:flutter/material.dart';
 import 'package:myapp/data/mongo_database.dart';
 
 class HomePage extends StatefulWidget {
+  final String userType;
+  final String userEmail;
+
+  HomePage({required this.userType, required this.userEmail});
+
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  late Future<List<Map<String, dynamic>>> _usersFuture;
+  late Future<Map<String, dynamic>> _userFuture;
 
   @override
   void initState() {
     super.initState();
-    _usersFuture = MongoDatabase.getAllUsers();
+    _userFuture = MongoDatabase.getUserByEmail(widget.userEmail);
   }
 
   @override
@@ -54,7 +58,7 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
             Text(
-              'خذ ماتحب', // Take what you love in Arabic
+              'Type d\'utilisateur: ${widget.userType}', // Display the user type
               style: TextStyle(fontSize: 24),
             ),
             Row(
@@ -75,26 +79,20 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
             Expanded(
-              child: FutureBuilder<List<Map<String, dynamic>>>(
-                future: _usersFuture,
+              child: FutureBuilder<Map<String, dynamic>>(
+                future: _userFuture,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(child: CircularProgressIndicator());
                   } else if (snapshot.hasError) {
                     return Center(child: Text('Erreur: ${snapshot.error}'));
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  } else if (!snapshot.hasData) {
                     return Center(child: Text('Aucun utilisateur trouvé.'));
                   } else {
-                    final users = snapshot.data!;
-                    return ListView.builder(
-                      itemCount: users.length,
-                      itemBuilder: (context, index) {
-                        final user = users[index];
-                        return ListTile(
-                          title: Text(user['email']),
-                          subtitle: Text(user['pwd']),
-                        );
-                      },
+                    final user = snapshot.data!;
+                    return ListTile(
+                      title: Text(user['email']),
+                      subtitle: Text(user['pwd'].toString()),
                     );
                   }
                 },
