@@ -36,14 +36,6 @@ class MongoDatabase {
     return user;
   }
 
-  
-  static Future<Map<String, dynamic>> getUserByEmail(String email) async {
-    final db = await _openDb();
-    final collection = db.collection(COLLECTION_NAME1);
-    final user = await collection.findOne(mongo.where.eq('email', email));
-    return user ?? {};
-  }
-
   static Future<bool> sendVerificationCode(String email) async {
     final db = await _openDb();
     final collection = db.collection(COLLECTION_NAME1);
@@ -135,5 +127,108 @@ class MongoDatabase {
 
     await closeDb(db);
     return true; // Password reset successfully
+  }
+
+  static Future<Map<String, dynamic>> getUserByEmail(String email) async {
+    final db = await _openDb();
+    final collection = db.collection(COLLECTION_NAME1);
+    final user = await collection.findOne(mongo.where.eq('email', email));
+    return user ?? {};
+  }
+
+  static Future<Map<String, dynamic>> getFactoryById(int factoryId) async {
+    final db = await _openDb();
+    final collection = db.collection(COLLECTION_NAME4);
+    final user =
+        await collection.findOne(mongo.where.eq('ID_Proprietaire', factoryId));
+    return user ?? {};
+  }
+
+  static Future<List<Map<String, dynamic>>> getAllFactories() async {
+    final db = await _openDb();
+    final collection = db.collection(COLLECTION_NAME4);
+    final factories = await collection.find().toList();
+    return factories;
+  }
+
+  static Future<void> sendRequest(
+      int idClient, int idProprietaire, int quantite) async {
+    final db = await _openDb();
+    final collection = db.collection(COLLECTION_NAME3);
+    await collection.insert({
+      'ID_Client': idClient,
+      'ID_Proprietaire': idProprietaire,
+      'quantite': quantite,
+      'etat': 'attendant',
+    });
+    _sendAnswer(idClient, idProprietaire, quantite);
+  }
+
+  static Future<bool> _sendAnswer(
+      int idClient, int idProprietaire, int quantite) async {
+    final smtpServer = SmtpServer('smtp.gmail.com',
+        username: 'produitslocauxmauritaniens@gmail.com',
+        password: 'oeuf ypbm elis fwqc');
+
+    final db = await _openDb();
+    final collection1 = db.collection('COLLECTION_NAME2');
+    final collection2 = db.collection('COLLECTION_NAME4');
+    final client =
+        await collection1.findOne(mongo.where.eq('ID_Client', idClient));
+    final proprietaire = await collection2
+        .findOne(mongo.where.eq('ID_Proprietaire', idProprietaire));
+
+    if (client == null || proprietaire == null) {
+      print('Client or Proprietaire not found.');
+      return false;
+    }
+
+    final message = Message()
+      ..from = Address('produitslocauxmauritaniens@gmail.com', 'Elemine')
+      ..recipients.add(proprietaire['email'])
+      ..subject = 'Message de demande de glace'
+      ..text =
+          "L'utilisateur ${client['nom']} ${client['prenom']} a fait une demande d'une quantité de $quantite kg de glace de votre fabrique.";
+
+    try {
+      final sendReport = await send(message, smtpServer);
+      print('Message sent: ' + sendReport.toString());
+      return true;
+    } on MailerException catch (e) {
+      print('Message not sent. ${e.toString()}');
+      for (var p in e.problems) {
+        print('Problem: ${p.code}: ${p.msg}');
+      }
+      return false;
+    } catch (e) {
+      print('An unexpected error occurred: ${e.toString()}');
+      return false;
+    }
+  }
+
+  static Future<List<Map<String, dynamic>>> getRequestsByOwnerEmail(
+      String email) async {
+    final db = await _openDb();
+    final collection1 = db.collection(COLLECTION_NAME3);
+    final collection2 = db.collection(COLLECTION_NAME4);
+    final collection3 =
+        db.collection(COLLECTION_NAME2); // Collection des clients
+
+    // final proprietaire =
+    //     await collection2.findOne(mongo.where.eq('email', email));
+    final requests = await collection1
+        .find(
+            mongo.where.eq('ID_Proprietaire', 1))
+        .toList();
+
+    // Ajouter les noms et prénoms des clients à chaque demande
+    // for (var request in requests) {
+    //   final client = await collection3
+    //       .findOne(mongo.where.eq('ID_Client', request['ID_Client']));
+    //   request['ClientNom'] = client?['nom'] ?? 'Inconnu';
+    //   request['ClientPrenom'] = client?['prenom'] ?? 'Inconnu';
+    // }
+
+    return requests;
   }
 }
