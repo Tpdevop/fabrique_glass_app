@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/data/mongo_database.dart';
+import '../screens/RequestDetailsPage.dart'; // Assurez-vous de créer cette page
 
 class ReceivedRequestsPage extends StatefulWidget {
   final String userEmail;
@@ -51,6 +52,14 @@ class _ReceivedRequestsPageState extends State<ReceivedRequestsPage> {
                     title: Text("Demande de: $clientNom $clientPrenom"),
                     subtitle: Text("Quantité: $quantite kg"),
                     trailing: Text("Statut: $etat"),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RequestDetailsPage(request: request),
+                        ),
+                      );
+                    },
                   );
                 },
               );

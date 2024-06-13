@@ -151,7 +151,7 @@ class MongoDatabase {
     return factories;
   }
 
-  static Future<void> sendRequest(
+  static Future<Future<bool>> sendRequest(
       int idClient, int idProprietaire, int quantite) async {
     final db = await _openDb();
     final collection = db.collection(COLLECTION_NAME3);
@@ -161,18 +161,21 @@ class MongoDatabase {
       'quantite': quantite,
       'etat': 'attendant',
     });
-    _sendAnswer(idClient, idProprietaire, quantite);
+    return _sendAnswer(idClient, idProprietaire, quantite);
   }
 
   static Future<bool> _sendAnswer(
       int idClient, int idProprietaire, int quantite) async {
-    final smtpServer = SmtpServer('smtp.gmail.com',
-        username: 'produitslocauxmauritaniens@gmail.com',
-        password: 'oeuf ypbm elis fwqc');
+    final smtpServer = SmtpServer(
+      'smtp.gmail.com',
+      username: 'produitslocauxmauritaniens@gmail.com',
+      password: 'uypk biho htjc lsyz',
+      ignoreBadCertificate: true,
+    );
 
     final db = await _openDb();
-    final collection1 = db.collection('COLLECTION_NAME2');
-    final collection2 = db.collection('COLLECTION_NAME4');
+    final collection1 = db.collection(COLLECTION_NAME2);
+    final collection2 = db.collection(COLLECTION_NAME4);
     final client =
         await collection1.findOne(mongo.where.eq('ID_Client', idClient));
     final proprietaire = await collection2
@@ -183,12 +186,15 @@ class MongoDatabase {
       return false;
     }
 
+    String nomCl = client['nom'];
+    String prenomCl = client['prenom'];
+
     final message = Message()
-      ..from = Address('produitslocauxmauritaniens@gmail.com', 'Elemine')
+      ..from = Address('produitslocauxmauritaniens@gmail.com', 'ice app')
       ..recipients.add(proprietaire['email'])
       ..subject = 'Message de demande de glace'
       ..text =
-          "L'utilisateur ${client['nom']} ${client['prenom']} a fait une demande d'une quantité de $quantite kg de glace de votre fabrique.";
+          "L'utilisateur $nomCl $prenomCl a fait une demande d'une quantité de $quantite kg de glace de votre fabrique.";
 
     try {
       final sendReport = await send(message, smtpServer);
@@ -214,21 +220,54 @@ class MongoDatabase {
     final collection3 =
         db.collection(COLLECTION_NAME2); // Collection des clients
 
-    // final proprietaire =
-    //     await collection2.findOne(mongo.where.eq('email', email));
-    final requests = await collection1
-        .find(
-            mongo.where.eq('ID_Proprietaire', 1))
-        .toList();
+    final proprietaire =
+        await collection2.findOne(mongo.where.eq('email', email));
+    final requests =
+        await collection1.find(mongo.where.eq('ID_Proprietaire', 1)).toList();
 
     // Ajouter les noms et prénoms des clients à chaque demande
-    // for (var request in requests) {
-    //   final client = await collection3
-    //       .findOne(mongo.where.eq('ID_Client', request['ID_Client']));
-    //   request['ClientNom'] = client?['nom'] ?? 'Inconnu';
-    //   request['ClientPrenom'] = client?['prenom'] ?? 'Inconnu';
-    // }
+    for (var request in requests) {
+      final client = await collection3
+          .findOne(mongo.where.eq('ID_Client', request['ID_Client']));
+      request['ClientNom'] = client?['nom'] ?? 'Inconnu';
+      request['ClientPrenom'] = client?['prenom'] ?? 'Inconnu';
+    }
 
     return requests;
   }
+
+  static Future<bool> updateRequestStatus(
+    mongo.ObjectId requestId, String status, int quantite, int idProprietaire) async {
+  final db = await _openDb();
+  final collection = db.collection(COLLECTION_NAME3);
+  final factoryCollection = db.collection(COLLECTION_NAME4);
+
+  // Update the request status
+  await collection.updateOne(
+    mongo.where.id(requestId),
+    mongo.modify.set('etat', status),
+  );
+
+  // If the status is accepted, update the quantity in the factory
+  if (status == 'acceptée') {
+    final factory = await factoryCollection.findOne(mongo.where.eq('ID_Proprietaire', idProprietaire));
+    if (factory != null) {
+      int currentQuantite = factory['quantite'] ?? 0;
+      int newQuantite = currentQuantite - quantite;
+
+      if (newQuantite < 0) {
+        print('Not enough quantity available.');
+        return false;
+      }
+
+      await factoryCollection.updateOne(
+        mongo.where.eq('ID_Proprietaire', idProprietaire),
+        mongo.modify.set('quantite', newQuantite),
+      );
+    }
+  }
+  
+  return true;
+}
+
 }

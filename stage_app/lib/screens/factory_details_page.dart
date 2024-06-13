@@ -64,7 +64,7 @@ class _FactoryDetailsPageState extends State<FactoryDetailsPage> {
                       if (quantity > 0 && quantity < factory['quantite']) {
                         await MongoDatabase.sendRequest(
                           widget.clientId,
-                          int.parse(factory['ID_Proprietaire']),
+                          factory['ID_Proprietaire'],
                           quantity,
                         );
                         // Add email notification logic here

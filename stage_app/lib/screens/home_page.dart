@@ -16,7 +16,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late Future<Map<String, dynamic>> _userFuture;
-  late int _clientId;
 
   @override
   void initState() {
@@ -51,9 +50,8 @@ class _HomePageState extends State<HomePage> {
               return Center(child: Text('Aucun utilisateur trouvé.'));
             } else {
               final user = snapshot.data!;
-              _clientId = user['ID_Client'];
               if (widget.userType == 'client') {
-                return _buildClientView(_clientId);
+                return _buildClientView(user['ID_Client']);
               } else if (widget.userType == 'proprietaire') {
                 return _buildProprietaireView();
               } else {
