@@ -25,39 +25,81 @@ class _ReceivedRequestsPageState extends State<ReceivedRequestsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Demandes reçues'),
+        title: Text('الطلبات المستلمة'),
+        backgroundColor: Colors.blueAccent,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: FutureBuilder<List<Map<String, dynamic>>>(
-          future: _requestsFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(child: Text('Erreur: ${snapshot.error}'));
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return Center(child: Text('Aucune demande trouvée.'));
-            } else {
-              final requests = snapshot.data!;
-              return ListView.builder(
-                itemCount: requests.length,
-                itemBuilder: (context, index) {
-                  final request = requests[index];
-                  final clientNom = request['ClientNom'] ?? 'Inconnu';
-                  final clientPrenom = request['ClientPrenom'] ?? 'Inconnu';
-                  final quantite = request['quantite'] ?? 'Non spécifiée';
-                  final etat = request['etat'] ?? 'Inconnu';
+      body: Directionality(
+        textDirection: TextDirection.rtl,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: FutureBuilder<List<Map<String, dynamic>>>(
+            future: _requestsFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return Center(child: Text('خطأ: ${snapshot.error}'));
+              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return Center(child: Text('لم يتم العثور على أي طلب.'));
+              } else {
+                final requests = snapshot.data!;
+                return ListView.builder(
+                  itemCount: requests.length,
+                  itemBuilder: (context, index) {
+                    final request = requests[index];
+                    final clientNom = request['ClientNom'] ?? 'غير معروف';
+                    final clientPrenom = request['ClientPrenom'] ?? 'غير معروف';
+                    final quantite =
+                        request['quantite']?.toString() ?? 'غير محدد';
+                    final etat = request['etat'] ?? 'غير معروف';
 
-                  return ListTile(
-                    title: Text("Demande de: $clientNom $clientPrenom"),
-                    subtitle: Text("Quantité: $quantite kg"),
-                    trailing: Text("Statut: $etat"),
-                  );
-                },
-              );
-            }
-          },
+                    return Card(
+                      margin:
+                          EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15.0),
+                      ),
+                      elevation: 5,
+                      child: ListTile(
+                        title: Text(
+                          "طلب من: $clientNom $clientPrenom",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        subtitle: Text(
+                          "الكمية: $quantite كجم",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.black54,
+                          ),
+                        ),
+                        trailing: Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 12.0, vertical: 4.0),
+                          decoration: BoxDecoration(
+                            color: Colors.blueAccent,
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          child: Text(
+                            "الحالة: $etat",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        contentPadding: EdgeInsets.symmetric(
+                            vertical: 12.0, horizontal: 16.0),
+                      ),
+                    );
+                  },
+                );
+              }
+            },
+          ),
         ),
       ),
     );

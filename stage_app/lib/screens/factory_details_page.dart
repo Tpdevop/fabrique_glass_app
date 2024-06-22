@@ -31,10 +31,10 @@ class _FactoryDetailsPageState extends State<FactoryDetailsPage> {
   }
 
   void _sendRequest(int quantity, Map<String, dynamic> factory) async {
-    if (quantity > 0 && quantity <= factory['quantite']) {
+    if (quantity > 0 && quantity <= (factory['quantite'] ?? 0)) {
       await MongoDatabase.sendRequest(
         widget.clientId,
-        int.parse(factory['ID_Proprietaire']),
+        factory['ID_Proprietaire'] ?? 0, // Ensure it's an int
         quantity,
       );
       ScaffoldMessenger.of(context).showSnackBar(
@@ -43,7 +43,7 @@ class _FactoryDetailsPageState extends State<FactoryDetailsPage> {
             children: [
               Icon(Icons.check, color: Colors.green),
               SizedBox(width: 10),
-              Text('Demande envoyée avec succès!'),
+              Text('تم إرسال الطلب بنجاح!'),
             ],
           ),
         ),
@@ -56,7 +56,7 @@ class _FactoryDetailsPageState extends State<FactoryDetailsPage> {
             children: [
               Icon(Icons.error, color: Colors.red),
               SizedBox(width: 10),
-              Text('Veuillez entrer une quantité valide.'),
+              Text('الرجاء إدخال كمية صالحة.'),
             ],
           ),
         ),
@@ -89,77 +89,91 @@ class _FactoryDetailsPageState extends State<FactoryDetailsPage> {
             ),
           ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: 10),
-            Row(
-              children: [
-                Icon(Icons.factory, color: Colors.blueAccent, size: 28),
-                SizedBox(width: 10),
-                Text(
-                  'Nom: ${factory['nom']}',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, fontFamily: 'Roboto'),
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 10),
+              Row(
+                children: [
+                  Icon(Icons.factory, color: Colors.blueAccent, size: 28),
+                  SizedBox(width: 10),
+                  Text(
+                    'اسم: ${factory['nom']}',
+                    style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Roboto'),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10),
+              Row(
+                children: [
+                  Icon(Icons.location_on, color: Colors.redAccent, size: 22),
+                  SizedBox(width: 10),
+                  Text(
+                    'الموقع: ${factory['location']}',
+                    style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.grey[700],
+                        fontFamily: 'Roboto'),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10),
+              Row(
+                children: [
+                  Icon(Icons.description, color: Colors.green, size: 22),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'الوصف: ${factory['description']}',
+                      style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey[600],
+                          fontFamily: 'Roboto'),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 20),
+              TextField(
+                controller: _quantityController,
+                decoration: InputDecoration(
+                  labelText: 'كمية الجليد',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.numbers),
                 ),
-              ],
-            ),
-            SizedBox(height: 10),
-            Row(
-              children: [
-                Icon(Icons.location_on, color: Colors.redAccent, size: 22),
-                SizedBox(width: 10),
-                Text(
-                  'Emplacement: ${factory['location']}',
-                  style: TextStyle(fontSize: 18, color: Colors.grey[700], fontFamily: 'Roboto'),
-                ),
-              ],
-            ),
-            SizedBox(height: 10),
-            Row(
-              children: [
-                Icon(Icons.description, color: Colors.green, size: 22),
-                SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    'Description: ${factory['description']}',
-                    style: TextStyle(fontSize: 16, color: Colors.grey[600], fontFamily: 'Roboto'),
+                keyboardType: TextInputType.number,
+              ),
+              SizedBox(height: 20),
+              MouseRegion(
+                onEnter: (_) => setState(() => _isHovering = true),
+                onExit: (_) => setState(() => _isHovering = false),
+                child: ElevatedButton(
+                  onPressed: () {
+                    int quantity = int.tryParse(_quantityController.text) ?? 0;
+                    _sendRequest(quantity, factory);
+                  },
+                  child: Text('إرسال الطلب'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        _isHovering ? Colors.orange[700] : Colors.orange,
+                    textStyle: TextStyle(
+                        fontWeight: FontWeight.bold, fontFamily: 'Roboto'),
+                    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0),
+                    ),
+                    shadowColor: Colors.black,
+                    elevation: 8.0,
                   ),
                 ),
-              ],
-            ),
-            SizedBox(height: 20),
-            TextField(
-              controller: _quantityController,
-              decoration: InputDecoration(
-                labelText: 'Quantité de glace',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.numbers),
               ),
-              keyboardType: TextInputType.number,
-            ),
-            SizedBox(height: 20),
-            MouseRegion(
-              onEnter: (_) => setState(() => _isHovering = true),
-              onExit: (_) => setState(() => _isHovering = false),
-              child: ElevatedButton(
-                onPressed: () {
-                  int quantity = int.tryParse(_quantityController.text) ?? 0;
-                  _sendRequest(quantity, factory);
-                },
-                child: Text('Envoyer la demande'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _isHovering ? Colors.orange[700] : Colors.orange,
-                  textStyle: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Roboto'),
-                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                  shadowColor: Colors.black,
-                  elevation: 8.0,
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -170,8 +184,9 @@ class _FactoryDetailsPageState extends State<FactoryDetailsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Détails de la fabrique',
-          style: TextStyle(color: Colors.white, fontSize: 27.0, fontFamily: 'Roboto'),
+          'تفاصيل المصنع',
+          style: TextStyle(
+              color: Colors.white, fontSize: 27.0, fontFamily: 'Roboto'),
         ),
         backgroundColor: Colors.deepPurple[700],
         iconTheme: IconThemeData(
@@ -181,7 +196,8 @@ class _FactoryDetailsPageState extends State<FactoryDetailsPage> {
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('images/background.png'), // Ensure you have a background image in assets
+            image: AssetImage(
+                'images/background.png'), // Ensure you have a background image in assets
             fit: BoxFit.cover,
           ),
         ),
@@ -191,9 +207,9 @@ class _FactoryDetailsPageState extends State<FactoryDetailsPage> {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
-              return Center(child: Text('Erreur: ${snapshot.error}'));
+              return Center(child: Text('خطأ: ${snapshot.error}'));
             } else if (!snapshot.hasData) {
-              return Center(child: Text('Aucune donnée trouvée.'));
+              return Center(child: Text('لم يتم العثور على بيانات.'));
             } else {
               return SingleChildScrollView(
                 child: _buildFactoryDetails(snapshot.data!),

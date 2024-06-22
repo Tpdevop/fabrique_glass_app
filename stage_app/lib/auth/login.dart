@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, use_build_context_synchronously
+// ignore_for_file: prefer_const_constructors, use_build_context_synchronously, deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -97,7 +97,6 @@ class _LoginPageState extends State<LoginPage> {
       ),
       body: Stack(
         children: [
-          // Animated Gradient Background
           AnimatedContainer(
             duration: Duration(seconds: 7),
             onEnd: () {
@@ -137,7 +136,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         SizedBox(height: 8),
                         Text(
-                          'يرجى تسجيل الدخول باستخدام البريد الإلكتروني وكلمة المرور الخاصة بك.',
+                          '. يرجى تسجيل الدخول باستخدام البريد الإلكتروني وكلمة المرور الخاصة بك',
                           style: theme.textTheme.titleMedium?.copyWith(
                             color: Colors.black54,
                           ),
@@ -151,7 +150,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         if (_lastEmail != null)
                           _buildLastInputButton(
-                            label: 'آخر بريد إلكتروني: $_lastEmail',
+                            label: '$_lastEmail آخر بريد إلكتروني: ',
                             onPressed: () {
                               _emailController.text = _lastEmail!;
                             },
@@ -176,13 +175,13 @@ class _LoginPageState extends State<LoginPage> {
                             },
                           ),
                         ),
-                        if (_lastPassword != null)
-                          _buildLastInputButton(
-                            label: 'آخر كلمة مرور: $_lastPassword',
-                            onPressed: () {
-                              _passwordController.text = _lastPassword!;
-                            },
-                          ),
+                        // if (_lastPassword != null)
+                        //   _buildLastInputButton(
+                        //     label: 'آخر كلمة مرور: $_lastPassword',
+                        //     onPressed: () {
+                        //       _passwordController.text = _lastPassword!;
+                        //     },
+                        //   ),
                         SizedBox(height: 20),
                         AnimatedSwitcher(
                           duration: Duration(milliseconds: 300),
