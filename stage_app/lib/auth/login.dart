@@ -1,5 +1,8 @@
 // login_page.dart
+// ignore_for_file: prefer_const_constructors, use_build_context_synchronously
+
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../data/mongo_database.dart';
 import '../screens/home_page.dart';
 
@@ -13,6 +16,22 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
   bool _obscurePassword = true;
+  String? _lastEmail;
+  String? _lastPassword;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLastInputs();
+  }
+
+  Future<void> _loadLastInputs() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _lastEmail = prefs.getString('lastEmail');
+      _lastPassword = prefs.getString('lastPassword');
+    });
+  }
 
   Future<void> _login() async {
     final email = _emailController.text;
@@ -34,10 +53,15 @@ class _LoginPageState extends State<LoginPage> {
         _isLoading = false;
       });
       if (user != null) {
+        final prefs = await SharedPreferences.getInstance();
+        prefs.setString('lastEmail', email);
+        prefs.setString('lastPassword', password);
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => HomePage(userType: user['type'],userEmail: user['email']),
+            builder: (context) =>
+                HomePage(userType: user['type'], userEmail: user['email']),
           ),
         );
       } else {
@@ -56,6 +80,7 @@ class _LoginPageState extends State<LoginPage> {
       SnackBar(
         content: Text(message),
         backgroundColor: Colors.red,
+         behavior: SnackBarBehavior.floating, 
         margin: EdgeInsetsDirectional.symmetric(vertical: 25.0),
       ),
     );
@@ -69,12 +94,7 @@ class _LoginPageState extends State<LoginPage> {
       appBar: AppBar(
         backgroundColor: Colors.blue.shade800,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
+        automaticallyImplyLeading: false,
       ),
       body: Stack(
         children: [
@@ -116,12 +136,25 @@ class _LoginPageState extends State<LoginPage> {
                             color: Colors.black87,
                           ),
                         ),
+                        SizedBox(height: 8),
+                        Text(
+                          'Veuillez vous connecter avec votre email et mot de passe.',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: Colors.black54,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                         SizedBox(height: 20),
                         _buildTextField(
                           controller: _emailController,
                           labelText: 'Email',
                           icon: Icons.email,
                         ),
+                        if (_lastEmail != null)
+                          Text(
+                            'Dernier email: $_lastEmail',
+                            style: TextStyle(color: Colors.grey),
+                          ),
                         SizedBox(height: 16),
                         _buildTextField(
                           controller: _passwordController,
@@ -130,7 +163,9 @@ class _LoginPageState extends State<LoginPage> {
                           obscureText: _obscurePassword,
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                              _obscurePassword
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
                               color: Colors.blue,
                             ),
                             onPressed: () {
@@ -140,13 +175,19 @@ class _LoginPageState extends State<LoginPage> {
                             },
                           ),
                         ),
+                        if (_lastPassword != null)
+                          Text(
+                            'Dernier mot de passe: $_lastPassword',
+                            style: TextStyle(color: Colors.grey),
+                          ),
                         SizedBox(height: 20),
                         AnimatedSwitcher(
                           duration: Duration(milliseconds: 300),
                           child: _isLoading
                               ? CircularProgressIndicator(
                                   key: ValueKey<int>(1),
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.blue),
                                 )
                               : _buildLoginButton(),
                         ),

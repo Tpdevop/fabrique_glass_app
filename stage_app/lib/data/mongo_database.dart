@@ -27,10 +27,8 @@ class MongoDatabase {
       String email, String password) async {
     final db = await _openDb();
     final collection = db.collection(COLLECTION_NAME1);
-    final user = await collection.findOne(mongo.where.eq('email', email).eq(
-        'pwd',
-        int.parse(
-            password))); // Assurez-vous que le champ du mot de passe est 'pwd'
+    final user = await collection
+        .findOne(mongo.where.eq('email', email).eq('pwd', int.parse(password)));
 
     await closeDb(db);
     return user;
@@ -66,7 +64,7 @@ class MongoDatabase {
 
     if (user == null) {
       await closeDb(db);
-      return false; // Invalid code or email
+      return false;
     }
 
     await collection.update(
@@ -75,7 +73,7 @@ class MongoDatabase {
     );
 
     await closeDb(db);
-    return true; // Password reset successfully
+    return true;
   }
 
   static String _generateVerificationCode() {
@@ -107,26 +105,6 @@ class MongoDatabase {
       print('Message not sent. $e');
       return false;
     }
-  }
-
-  static Future<bool> verifyCode(
-      String email, String code, String Password) async {
-    final db = await _openDb();
-    final collection = db.collection(COLLECTION_NAME1);
-    final user = await collection
-        .findOne(mongo.where.eq('email', email).eq('verificationCode', code));
-
-    if (user == null) {
-      await closeDb(db);
-      return false; // Invalid code or email
-    }
-    await collection.update(
-      mongo.where.eq('email', email),
-      mongo.modify.set('pwd', Password).unset('verificationCode'),
-    );
-
-    await closeDb(db);
-    return true; // Password reset successfully
   }
 
   static Future<Map<String, dynamic>> getUserByEmail(String email) async {
@@ -217,22 +195,17 @@ class MongoDatabase {
     final db = await _openDb();
     final collection1 = db.collection(COLLECTION_NAME3);
     final collection2 = db.collection(COLLECTION_NAME4);
-    final collection3 =
-        db.collection(COLLECTION_NAME2); // Collection des clients
 
     final proprietaire =
         await collection2.findOne(mongo.where.eq('email', email));
-    final requests =
-        await collection1.find(mongo.where.eq('ID_Proprietaire', 1)).toList();
-
-    // Ajouter les noms et prénoms des clients à chaque demande
-    for (var request in requests) {
-      final client = await collection3
-          .findOne(mongo.where.eq('ID_Client', request['ID_Client']));
-      request['ClientNom'] = client?['nom'] ?? 'Inconnu';
-      request['ClientPrenom'] = client?['prenom'] ?? 'Inconnu';
+    if (proprietaire == null) {
+      return [];
     }
 
+    final requests = await collection1
+        .find(
+            mongo.where.eq('ID_Proprietaire', proprietaire['ID_Proprietaire']))
+        .toList();
     return requests;
   }
 
