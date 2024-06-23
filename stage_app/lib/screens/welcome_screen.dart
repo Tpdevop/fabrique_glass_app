@@ -15,7 +15,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
   late Animation<double> _scaleAnimation;
-  late Animation<double> _rotateAnimation;
   late Animation<double> _buttonScaleAnimation;
 
   @override
@@ -39,12 +38,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
     );
 
-    _rotateAnimation = Tween<double>(begin: -0.05, end: 0.05)
-        .chain(CurveTween(curve: Curves.elasticInOut))
-        .animate(
-          CurvedAnimation(parent: _controller, curve: Curves.elasticInOut),
-        );
-
     _buttonScaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
     );
@@ -60,216 +53,219 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          Image.asset(
-            'images/logo.png',
-            fit: BoxFit.cover,
-          ),
-          // Color Overlay
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.black.withOpacity(0.5),
-                  Colors.black.withOpacity(0.5)
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.asset(
+              'images/logo.png',
+              fit: BoxFit.cover,
+            ),
+            // لون تراكب
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.black.withOpacity(0.5),
+                    Colors.black.withOpacity(0.5)
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
               ),
             ),
-          ),
-          // Animated Logo
-          FadeTransition(
-            opacity: _fadeAnimation,
-            child: ScaleTransition(
-              scale: _scaleAnimation,
-              child: Center(),
+            // شعار متحرك
+            FadeTransition(
+              opacity: _fadeAnimation,
+              child: ScaleTransition(
+                scale: _scaleAnimation,
+                child: Center(),
+              ),
             ),
-          ),
-          // Content with Fade Transition
-          FadeTransition(
-            opacity: _fadeAnimation,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                      height: 140), // To ensure the logo is well-positioned
-                  ScaleTransition(
-                    scale: _scaleAnimation,
-                    child: Text(
-                      'Welcome to Glasses Maker',
-                      style: GoogleFonts.lobster(
-                        textStyle: TextStyle(
-                          fontSize: 40,
-                          color: Colors.white,
-                          shadows: [
-                            Shadow(
-                              blurRadius: 10.0,
-                              color: Colors.black,
-                              offset: Offset(5.0, 5.0),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  SlideTransition(
-                    position: _slideAnimation,
-                    child: Text(
-                      'Crafting Perfection for You',
-                      style: GoogleFonts.roboto(
-                        textStyle: TextStyle(
-                          fontSize: 24,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w300,
-                          shadows: [
-                            Shadow(
-                              blurRadius: 10.0,
-                              color: Colors.black,
-                              offset: Offset(3.0, 3.0),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 40),
-                  SlideTransition(
-                    position: _slideAnimation,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 30.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Features:',
-                            style: GoogleFonts.roboto(
-                              textStyle: TextStyle(
-                                fontSize: 22,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                shadows: [
-                                  Shadow(
-                                    blurRadius: 10.0,
-                                    color: Colors.black,
-                                    offset: Offset(3.0, 3.0),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 10),
-                          Row(
-                            children: [
-                              Icon(Icons.check_circle,
-                                  color: Colors.lightGreenAccent),
-                              SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  'Easily create and track your orders.',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    color: Colors.white,
-                                    shadows: [
-                                      Shadow(
-                                        blurRadius: 10.0,
-                                        color: Colors.black,
-                                        offset: Offset(3.0, 3.0),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 10),
-                          Row(
-                            children: [
-                              Icon(Icons.check_circle,
-                                  color: Colors.lightGreenAccent),
-                              SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  'Receive real-time notifications.',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    color: Colors.white,
-                                    shadows: [
-                                      Shadow(
-                                        blurRadius: 10.0,
-                                        color: Colors.black,
-                                        offset: Offset(3.0, 3.0),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 10),
-                          Row(
-                            children: [
-                              Icon(Icons.check_circle,
-                                  color: Colors.lightGreenAccent),
-                              SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  'View your order history.',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    color: Colors.white,
-                                    shadows: [
-                                      Shadow(
-                                        blurRadius: 10.0,
-                                        color: Colors.black,
-                                        offset: Offset(3.0, 3.0),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 40),
-                  ScaleTransition(
-                    scale: _buttonScaleAnimation,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => LoginPage(),
-                        ));
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                        textStyle: TextStyle(fontSize: 18, color: Colors.white),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30.0),
-                        ),
-                        elevation: 10,
-                        shadowColor: Colors.black,
-                      ),
+            // محتوى مع انتقال تلاشي
+            FadeTransition(
+              opacity: _fadeAnimation,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(height: 140), // لضمان وضع الشعار بشكل جيد
+                    ScaleTransition(
+                      scale: _scaleAnimation,
                       child: Text(
-                        'Get Started',
-                        style: TextStyle(color: Colors.white),
+                        'مرحبا بكم في صانع الجليد',
+                        style: GoogleFonts.lobster(
+                          textStyle: TextStyle(
+                            fontSize: 40,
+                            color: Colors.white,
+                            shadows: [
+                              Shadow(
+                                blurRadius: 10.0,
+                                color: Colors.black,
+                                offset: Offset(5.0, 5.0),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                    SizedBox(height: 20),
+                    SlideTransition(
+                      position: _slideAnimation,
+                      child: Text(
+                        'نحن نصنع الكمال من أجلك',
+                        style: GoogleFonts.roboto(
+                          textStyle: TextStyle(
+                            fontSize: 24,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w300,
+                            shadows: [
+                              Shadow(
+                                blurRadius: 10.0,
+                                color: Colors.black,
+                                offset: Offset(3.0, 3.0),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 40),
+                    SlideTransition(
+                      position: _slideAnimation,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'المميزات:',
+                              style: GoogleFonts.roboto(
+                                textStyle: TextStyle(
+                                  fontSize: 22,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  shadows: [
+                                    Shadow(
+                                      blurRadius: 10.0,
+                                      color: Colors.black,
+                                      offset: Offset(3.0, 3.0),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Icon(Icons.check_circle,
+                                    color: Colors.lightGreenAccent),
+                                SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    'يمكنك بسهولة إنشاء وتتبع طلباتك.',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      color: Colors.white,
+                                      shadows: [
+                                        Shadow(
+                                          blurRadius: 10.0,
+                                          color: Colors.black,
+                                          offset: Offset(3.0, 3.0),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Icon(Icons.check_circle,
+                                    color: Colors.lightGreenAccent),
+                                SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    'تتلقى الإخطارات في الوقت الحقيقي.',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      color: Colors.white,
+                                      shadows: [
+                                        Shadow(
+                                          blurRadius: 10.0,
+                                          color: Colors.black,
+                                          offset: Offset(3.0, 3.0),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Icon(Icons.check_circle,
+                                    color: Colors.lightGreenAccent),
+                                SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    'يمكنك مراجعة تاريخ طلبك.',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      color: Colors.white,
+                                      shadows: [
+                                        Shadow(
+                                          blurRadius: 10.0,
+                                          color: Colors.black,
+                                          offset: Offset(3.0, 3.0),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 40),
+                    ScaleTransition(
+                      scale: _buttonScaleAnimation,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => LoginPage(),
+                          ));
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blueAccent,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 30, vertical: 15),
+                          textStyle:
+                              TextStyle(fontSize: 18, color: Colors.white),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30.0),
+                          ),
+                          elevation: 10,
+                          shadowColor: Colors.black,
+                        ),
+                        child: Text(
+                          'ابدأ الآن',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

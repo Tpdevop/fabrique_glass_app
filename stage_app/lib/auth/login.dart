@@ -1,5 +1,4 @@
-// login_page.dart
-// ignore_for_file: prefer_const_constructors, use_build_context_synchronously
+// ignore_for_file: prefer_const_constructors, use_build_context_synchronously, deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -17,7 +16,7 @@ class _LoginPageState extends State<LoginPage> {
   bool _isLoading = false;
   bool _obscurePassword = true;
   String? _lastEmail;
-  String? _lastPassword;
+  // String? _lastPassword;
 
   @override
   void initState() {
@@ -29,7 +28,7 @@ class _LoginPageState extends State<LoginPage> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _lastEmail = prefs.getString('lastEmail');
-      _lastPassword = prefs.getString('lastPassword');
+      // _lastPassword = prefs.getString('lastPassword');
     });
   }
 
@@ -38,7 +37,7 @@ class _LoginPageState extends State<LoginPage> {
     final password = _passwordController.text;
 
     if (email.isEmpty || password.isEmpty) {
-      _showSnackBar('Veuillez remplir tous les champs.');
+      _showSnackBar('يرجى ملء جميع الحقول.');
       return;
     }
 
@@ -65,13 +64,13 @@ class _LoginPageState extends State<LoginPage> {
           ),
         );
       } else {
-        _showSnackBar('Email ou mot de passe incorrect.');
+        _showSnackBar('البريد الإلكتروني أو كلمة المرور غير صحيحة.');
       }
     } catch (e) {
       setState(() {
         _isLoading = false;
       });
-      _showSnackBar('Une erreur est survenue. Veuillez réessayer.');
+      _showSnackBar('حدث خطأ ما. يرجى المحاولة مرة أخرى.');
     }
   }
 
@@ -80,7 +79,7 @@ class _LoginPageState extends State<LoginPage> {
       SnackBar(
         content: Text(message),
         backgroundColor: Colors.red,
-         behavior: SnackBarBehavior.floating, 
+        behavior: SnackBarBehavior.floating,
         margin: EdgeInsetsDirectional.symmetric(vertical: 25.0),
       ),
     );
@@ -98,7 +97,6 @@ class _LoginPageState extends State<LoginPage> {
       ),
       body: Stack(
         children: [
-          // Animated Gradient Background
           AnimatedContainer(
             duration: Duration(seconds: 7),
             onEnd: () {
@@ -130,7 +128,7 @@ class _LoginPageState extends State<LoginPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'Connexion',
+                          'تسجيل الدخول',
                           style: theme.textTheme.headlineMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: Colors.black87,
@@ -138,7 +136,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         SizedBox(height: 8),
                         Text(
-                          'Veuillez vous connecter avec votre email et mot de passe.',
+                          '. يرجى تسجيل الدخول باستخدام البريد الإلكتروني وكلمة المرور الخاصة بك',
                           style: theme.textTheme.titleMedium?.copyWith(
                             color: Colors.black54,
                           ),
@@ -147,18 +145,20 @@ class _LoginPageState extends State<LoginPage> {
                         SizedBox(height: 20),
                         _buildTextField(
                           controller: _emailController,
-                          labelText: 'Email',
+                          labelText: 'البريد الإلكتروني',
                           icon: Icons.email,
                         ),
                         if (_lastEmail != null)
-                          Text(
-                            'Dernier email: $_lastEmail',
-                            style: TextStyle(color: Colors.grey),
+                          _buildLastInputButton(
+                            label: '$_lastEmail آخر بريد إلكتروني: ',
+                            onPressed: () {
+                              _emailController.text = _lastEmail!;
+                            },
                           ),
                         SizedBox(height: 16),
                         _buildTextField(
                           controller: _passwordController,
-                          labelText: 'Mot de passe',
+                          labelText: 'كلمة المرور',
                           icon: Icons.lock,
                           obscureText: _obscurePassword,
                           suffixIcon: IconButton(
@@ -175,11 +175,13 @@ class _LoginPageState extends State<LoginPage> {
                             },
                           ),
                         ),
-                        if (_lastPassword != null)
-                          Text(
-                            'Dernier mot de passe: $_lastPassword',
-                            style: TextStyle(color: Colors.grey),
-                          ),
+                        // if (_lastPassword != null)
+                        //   _buildLastInputButton(
+                        //     label: 'آخر كلمة مرور: $_lastPassword',
+                        //     onPressed: () {
+                        //       _passwordController.text = _lastPassword!;
+                        //     },
+                        //   ),
                         SizedBox(height: 20),
                         AnimatedSwitcher(
                           duration: Duration(milliseconds: 300),
@@ -270,24 +272,29 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
       onPressed: _login,
-      child: Text('Se Connecter'),
+      child: Text('تسجيل الدخول'),
     );
   }
 
-  Widget _buildTextButton({
+  Widget _buildLastInputButton({
     required String label,
     required VoidCallback onPressed,
   }) {
-    return TextButton(
-      style: TextButton.styleFrom(
-        foregroundColor: Colors.blue,
-        textStyle: TextStyle(
-          decoration: TextDecoration.underline,
-          fontSize: 16,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          foregroundColor: Colors.white,
+          backgroundColor: Colors.grey,
+          padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          textStyle: TextStyle(fontSize: 14.0),
         ),
+        onPressed: onPressed,
+        child: Text(label, textAlign: TextAlign.center),
       ),
-      onPressed: onPressed,
-      child: Text(label),
     );
   }
 }

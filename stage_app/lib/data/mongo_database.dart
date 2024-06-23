@@ -7,10 +7,10 @@ import 'dart:math';
 
 const MONGO_URL =
     "mongodb+srv://medleminehaj:22482188@mycluster.j2cqkjb.mongodb.net/myapp?retryWrites=true&w=majority&appName=mycluster";
-const COLLECTION_NAME1 = "Utilisateurs";
-const COLLECTION_NAME2 = "Client";
-const COLLECTION_NAME3 = "Demande";
-const COLLECTION_NAME4 = "Proprietaire";
+const Utilisateurs_COLLECTION = "Utilisateurs";
+const Client_COLLECTION = "Client";
+const Demande_COLLECTION = "Demande";
+const Proprietaire_COLLECTION = "Proprietaire";
 
 class MongoDatabase {
   static Future<mongo.Db> _openDb() async {
@@ -26,7 +26,7 @@ class MongoDatabase {
   static Future<Map<String, dynamic>?> login(
       String email, String password) async {
     final db = await _openDb();
-    final collection = db.collection(COLLECTION_NAME1);
+    final collection = db.collection(Utilisateurs_COLLECTION);
     final user = await collection
         .findOne(mongo.where.eq('email', email).eq('pwd', int.parse(password)));
 
@@ -36,7 +36,7 @@ class MongoDatabase {
 
   static Future<bool> sendVerificationCode(String email) async {
     final db = await _openDb();
-    final collection = db.collection(COLLECTION_NAME1);
+    final collection = db.collection(Utilisateurs_COLLECTION);
     final user = await collection.findOne(mongo.where.eq('email', email));
     final verificationCode = _generateVerificationCode();
 
@@ -58,7 +58,7 @@ class MongoDatabase {
   static Future<bool> verifyCodeAndResetPassword(
       String email, String code, String newPassword) async {
     final db = await _openDb();
-    final collection = db.collection(COLLECTION_NAME1);
+    final collection = db.collection(Utilisateurs_COLLECTION);
     final user = await collection
         .findOne(mongo.where.eq('email', email).eq('verificationCode', code));
 
@@ -109,14 +109,14 @@ class MongoDatabase {
 
   static Future<Map<String, dynamic>> getUserByEmail(String email) async {
     final db = await _openDb();
-    final collection = db.collection(COLLECTION_NAME1);
+    final collection = db.collection(Utilisateurs_COLLECTION);
     final user = await collection.findOne(mongo.where.eq('email', email));
     return user ?? {};
   }
 
   static Future<Map<String, dynamic>> getFactoryById(int factoryId) async {
     final db = await _openDb();
-    final collection = db.collection(COLLECTION_NAME4);
+    final collection = db.collection(Proprietaire_COLLECTION);
     final user =
         await collection.findOne(mongo.where.eq('ID_Proprietaire', factoryId));
     return user ?? {};
@@ -124,7 +124,7 @@ class MongoDatabase {
 
   static Future<List<Map<String, dynamic>>> getAllFactories() async {
     final db = await _openDb();
-    final collection = db.collection(COLLECTION_NAME4);
+    final collection = db.collection(Proprietaire_COLLECTION);
     final factories = await collection.find().toList();
     return factories;
   }
@@ -132,7 +132,7 @@ class MongoDatabase {
   static Future<Future<bool>> sendRequest(
       int idClient, int idProprietaire, int quantite) async {
     final db = await _openDb();
-    final collection = db.collection(COLLECTION_NAME3);
+    final collection = db.collection(Demande_COLLECTION);
     await collection.insert({
       'ID_Client': idClient,
       'ID_Proprietaire': idProprietaire,
@@ -152,8 +152,8 @@ class MongoDatabase {
     );
 
     final db = await _openDb();
-    final collection1 = db.collection(COLLECTION_NAME2);
-    final collection2 = db.collection(COLLECTION_NAME4);
+    final collection1 = db.collection(Client_COLLECTION);
+    final collection2 = db.collection(Proprietaire_COLLECTION);
     final client =
         await collection1.findOne(mongo.where.eq('ID_Client', idClient));
     final proprietaire = await collection2
@@ -190,57 +190,66 @@ class MongoDatabase {
     }
   }
 
-  static Future<List<Map<String, dynamic>>> getRequestsByOwnerEmail(
-      String email) async {
-    final db = await _openDb();
-    final collection1 = db.collection(COLLECTION_NAME3);
-    final collection2 = db.collection(COLLECTION_NAME4);
-
-    final proprietaire =
-        await collection2.findOne(mongo.where.eq('email', email));
-    if (proprietaire == null) {
-      return [];
-    }
-
-    final requests = await collection1
-        .find(
-            mongo.where.eq('ID_Proprietaire', proprietaire['ID_Proprietaire']))
-        .toList();
-    return requests;
-  }
-
-  static Future<bool> updateRequestStatus(
-    mongo.ObjectId requestId, String status, int quantite, int idProprietaire) async {
+  static Future<int?> getProprietaireParEmail(String email) async {
   final db = await _openDb();
-  final collection = db.collection(COLLECTION_NAME3);
-  final factoryCollection = db.collection(COLLECTION_NAME4);
+  final collection2 = db.collection(Proprietaire_COLLECTION);
 
-  // Update the request status
-  await collection.updateOne(
-    mongo.where.id(requestId),
-    mongo.modify.set('etat', status),
-  );
+  // Supprimer les espaces supplémentaires autour de l'email
+  email = email.trim();
 
-  // If the status is accepted, update the quantity in the factory
-  if (status == 'acceptée') {
-    final factory = await factoryCollection.findOne(mongo.where.eq('ID_Proprietaire', idProprietaire));
-    if (factory != null) {
-      int currentQuantite = factory['quantite'] ?? 0;
-      int newQuantite = currentQuantite - quantite;
+  final proprietaire = await collection2.findOne(mongo.where.eq('email', email));
 
-      if (newQuantite < 0) {
-        print('Not enough quantity available.');
-        return false;
-      }
-
-      await factoryCollection.updateOne(
-        mongo.where.eq('ID_Proprietaire', idProprietaire),
-        mongo.modify.set('quantite', newQuantite),
-      );
-    }
+  if (proprietaire != null) {
+    print('Propriétaire trouvé: $proprietaire');
+    return proprietaire['ID_Proprietaire'];
+  } else {
+    print('Aucun propriétaire trouvé pour cet email: $email');
+    return null;
   }
-  
-  return true;
 }
 
+
+static Future<List<Map<String, dynamic>>> getRequestsByOwnerEmail(int id) async {
+  final db = await _openDb();
+  final collection1 = db.collection(Demande_COLLECTION);
+
+  final requests = await collection1.find(mongo.where.eq('ID_Proprietaire', id)).toList();
+  return requests;
+}
+
+
+  static Future<bool> updateRequestStatus(mongo.ObjectId requestId,
+      String status, int quantite, int idProprietaire) async {
+    final db = await _openDb();
+    final collection = db.collection(Demande_COLLECTION);
+    final factoryCollection = db.collection(Proprietaire_COLLECTION);
+
+    // Update the request status
+    await collection.updateOne(
+      mongo.where.id(requestId),
+      mongo.modify.set('etat', status),
+    );
+
+    // If the status is accepted, update the quantity in the factory
+    if (status == 'acceptée') {
+      final factory = await factoryCollection
+          .findOne(mongo.where.eq('ID_Proprietaire', idProprietaire));
+      if (factory != null) {
+        int currentQuantite = factory['quantite'] ?? 0;
+        int newQuantite = currentQuantite - quantite;
+
+        if (newQuantite < 0) {
+          print('Not enough quantity available.');
+          return false;
+        }
+
+        await factoryCollection.updateOne(
+          mongo.where.eq('ID_Proprietaire', idProprietaire),
+          mongo.modify.set('quantite', newQuantite),
+        );
+      }
+    }
+
+    return true;
+  }
 }

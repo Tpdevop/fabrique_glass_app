@@ -21,7 +21,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
   late Future<Map<String, dynamic>> _userFuture;
-  late int _clientId;
+  // late int _clientId;
   late AnimationController _controller;
   late Animation<double> _animation;
   late Animation<Offset> _slideAnimation;
@@ -99,7 +99,11 @@ class _HomePageState extends State<HomePage>
         backgroundColor: Colors.deepPurple[700],
         actions: [
           IconButton(
-            icon: Icon(Icons.account_circle, color: Colors.white , size: 30.0,),
+            icon: Icon(
+              Icons.account_circle,
+              color: Colors.white,
+              size: 30.0,
+            ),
             onPressed: _openDrawer,
           ),
         ],
@@ -198,9 +202,9 @@ class _HomePageState extends State<HomePage>
                 return Center(child: Text('Aucun utilisateur trouvé.'));
               } else {
                 final user = snapshot.data!;
-                _clientId = user['ID_Client'];
+                final clientId = user['ID_Client'];
                 if (widget.userType == 'client') {
-                  return _buildClientView(_clientId);
+                  return _buildClientView(clientId);
                 } else if (widget.userType == 'proprietaire') {
                   return _buildProprietaireView();
                 } else {
@@ -242,8 +246,8 @@ class _HomePageState extends State<HomePage>
                   itemCount: factories.length,
                   itemBuilder: (context, index) {
                     final factory = factories[index];
-                    String nom = factory['nom'];
-                    String prenom = factory['prenom'];
+                    // String nom = factory['nom'];
+                    // String prenom = factory['prenom'];
                     return FactoryCard(
                       factory: factory,
                       animation: _animation,
@@ -294,14 +298,21 @@ class _HomePageState extends State<HomePage>
               borderRadius: BorderRadius.circular(10.0),
             ),
           ),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) =>
-                    ReceivedRequestsPage(userEmail: widget.userEmail),
-              ),
-            );
+          onPressed: () async {
+            String trimmedEmail = widget.userEmail.trim();
+            int? ownerId = await MongoDatabase.getProprietaireParEmail(trimmedEmail);
+            if (ownerId != null) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ReceivedRequestsPage(ownerId: ownerId),
+                ),
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Propriétaire non trouvé pour cet email.')),
+              );
+            }
           },
         ),
       ],

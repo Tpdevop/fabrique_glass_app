@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Propriétaires</h1>
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nom</th>
+            <th>Email</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for proprietaire in proprietaires %}
+        <tr>
+            <td>{{ proprietaire._id }}</td>
+            <td>{{ proprietaire.nom }}</td>
+            <td>{{ proprietaire.email }}</td>
+            <td>
+                <a href="{{ url_for('get_proprietaire', id=proprietaire._id) }}">Voir</a>
+                <a href="{{ url_for('edit_proprietaire', id=proprietaire._id) }}">Modifier</a>
+                <a href="{{ url_for('delete_proprietaire', id=proprietaire._id) }}">Supprimer</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a href="{{ url_for('create_proprietaire') }}">Créer un nouveau propriétaire</a>
+{% endblock %}
