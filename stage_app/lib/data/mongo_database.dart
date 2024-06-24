@@ -109,9 +109,35 @@ class MongoDatabase {
 
   static Future<Map<String, dynamic>> getUserByEmail(String email) async {
     final db = await _openDb();
-    final collection = db.collection(Utilisateurs_COLLECTION);
-    final user = await collection.findOne(mongo.where.eq('email', email));
-    return user ?? {};
+    final userCollection = db.collection(Utilisateurs_COLLECTION);
+    final clientCollection = db.collection(Client_COLLECTION);
+    final proprietaireCollection =
+        db.collection(Proprietaire_COLLECTION); // Add this line
+
+    final user = await userCollection.findOne(mongo.where.eq('email', email));
+    if (user == null) {
+      await closeDb(db);
+      return {};
+    }
+
+    final clientId = user['ID_Client'];
+    final proprietaireId = user['ID_Proprietaire']; // Add this line
+
+    if (clientId != null) {
+      final client =
+          await clientCollection.findOne(mongo.where.eq('ID_Client', clientId));
+      await closeDb(db);
+      return {...user, ...?client};
+    } else if (proprietaireId != null) {
+      // Add this condition
+      final proprietaire = await proprietaireCollection
+          .findOne(mongo.where.eq('ID_Proprietaire', proprietaireId));
+      await closeDb(db);
+      return {...user, ...?proprietaire};
+    }
+
+    await closeDb(db);
+    return user;
   }
 
   static Future<Map<String, dynamic>> getFactoryById(int factoryId) async {
@@ -191,32 +217,33 @@ class MongoDatabase {
   }
 
   static Future<int?> getProprietaireParEmail(String email) async {
-  final db = await _openDb();
-  final collection2 = db.collection(Proprietaire_COLLECTION);
+    final db = await _openDb();
+    final collection2 = db.collection(Proprietaire_COLLECTION);
 
-  // Supprimer les espaces supplémentaires autour de l'email
-  email = email.trim();
+    // Supprimer les espaces supplémentaires autour de l'email
+    email = email.trim();
 
-  final proprietaire = await collection2.findOne(mongo.where.eq('email', email));
+    final proprietaire =
+        await collection2.findOne(mongo.where.eq('email', email));
 
-  if (proprietaire != null) {
-    print('Propriétaire trouvé: $proprietaire');
-    return proprietaire['ID_Proprietaire'];
-  } else {
-    print('Aucun propriétaire trouvé pour cet email: $email');
-    return null;
+    if (proprietaire != null) {
+      print('Propriétaire trouvé: $proprietaire');
+      return proprietaire['ID_Proprietaire'];
+    } else {
+      print('Aucun propriétaire trouvé pour cet email: $email');
+      return null;
+    }
   }
-}
 
+  static Future<List<Map<String, dynamic>>> getRequestsByOwnerEmail(
+      int id) async {
+    final db = await _openDb();
+    final collection1 = db.collection(Demande_COLLECTION);
 
-static Future<List<Map<String, dynamic>>> getRequestsByOwnerEmail(int id) async {
-  final db = await _openDb();
-  final collection1 = db.collection(Demande_COLLECTION);
-
-  final requests = await collection1.find(mongo.where.eq('ID_Proprietaire', id)).toList();
-  return requests;
-}
-
+    final requests =
+        await collection1.find(mongo.where.eq('ID_Proprietaire', id)).toList();
+    return requests;
+  }
 
   static Future<bool> updateRequestStatus(mongo.ObjectId requestId,
       String status, int quantite, int idProprietaire) async {
@@ -252,4 +279,17 @@ static Future<List<Map<String, dynamic>>> getRequestsByOwnerEmail(int id) async 
 
     return true;
   }
+
+  // static Future<List<Map<String, dynamic>>> getFactoriesByProprietaireId(
+  //     String proprietaireId) async {
+  //   final db = await _openDb();
+  //   final factoryCollection = db.collection(Proprietaire_COLLECTION);
+
+  //   final factories = await factoryCollection
+  //       .find(mongo.where.eq('ID_Proprietaire', proprietaireId))
+  //       .toList();
+  //   await closeDb(db);
+
+  //   return factories;
+  // }
 }

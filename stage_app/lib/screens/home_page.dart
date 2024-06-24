@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, use_build_context_synchronously
 
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -21,7 +21,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
   late Future<Map<String, dynamic>> _userFuture;
-  // late int _clientId;
   late AnimationController _controller;
   late Animation<double> _animation;
   late Animation<Offset> _slideAnimation;
@@ -33,7 +32,7 @@ class _HomePageState extends State<HomePage>
     super.initState();
     _userFuture = _fetchUserData();
     _controller = AnimationController(
-      duration: const Duration(seconds: 5),
+      duration: const Duration(seconds: 2),
       vsync: this,
     );
     _animation = CurvedAnimation(
@@ -246,8 +245,6 @@ class _HomePageState extends State<HomePage>
                   itemCount: factories.length,
                   itemBuilder: (context, index) {
                     final factory = factories[index];
-                    // String nom = factory['nom'];
-                    // String prenom = factory['prenom'];
                     return FactoryCard(
                       factory: factory,
                       animation: _animation,
@@ -300,7 +297,8 @@ class _HomePageState extends State<HomePage>
           ),
           onPressed: () async {
             String trimmedEmail = widget.userEmail.trim();
-            int? ownerId = await MongoDatabase.getProprietaireParEmail(trimmedEmail);
+            int? ownerId =
+                await MongoDatabase.getProprietaireParEmail(trimmedEmail);
             if (ownerId != null) {
               Navigator.push(
                 context,
@@ -310,7 +308,8 @@ class _HomePageState extends State<HomePage>
               );
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Propriétaire non trouvé pour cet email.')),
+                SnackBar(
+                    content: Text('Propriétaire non trouvé pour cet email.')),
               );
             }
           },

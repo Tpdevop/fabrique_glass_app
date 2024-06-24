@@ -63,42 +63,31 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               'images/logo.png',
               fit: BoxFit.cover,
             ),
-            // لون تراكب
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Colors.black.withOpacity(0.5),
-                    Colors.black.withOpacity(0.5)
+                    Colors.black.withOpacity(0.7),
+                    Colors.black.withOpacity(0.7),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
               ),
             ),
-            // شعار متحرك
-            FadeTransition(
-              opacity: _fadeAnimation,
-              child: ScaleTransition(
-                scale: _scaleAnimation,
-                child: Center(),
-              ),
-            ),
-            // محتوى مع انتقال تلاشي
             FadeTransition(
               opacity: _fadeAnimation,
               child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    SizedBox(height: 140), // لضمان وضع الشعار بشكل جيد
                     ScaleTransition(
                       scale: _scaleAnimation,
                       child: Text(
                         'مرحبا بكم في صانع الجليد',
                         style: GoogleFonts.lobster(
                           textStyle: TextStyle(
-                            fontSize: 40,
+                            fontSize: 48,
                             color: Colors.white,
                             shadows: [
                               Shadow(
@@ -158,77 +147,13 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                               ),
                             ),
                             SizedBox(height: 10),
-                            Row(
-                              children: [
-                                Icon(Icons.check_circle,
-                                    color: Colors.lightGreenAccent),
-                                SizedBox(width: 10),
-                                Expanded(
-                                  child: Text(
-                                    'يمكنك بسهولة إنشاء وتتبع طلباتك.',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      color: Colors.white,
-                                      shadows: [
-                                        Shadow(
-                                          blurRadius: 10.0,
-                                          color: Colors.black,
-                                          offset: Offset(3.0, 3.0),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+                            _buildFeatureRow(
+                                'يمكنك بسهولة إنشاء وتتبع طلباتك.'),
                             SizedBox(height: 10),
-                            Row(
-                              children: [
-                                Icon(Icons.check_circle,
-                                    color: Colors.lightGreenAccent),
-                                SizedBox(width: 10),
-                                Expanded(
-                                  child: Text(
-                                    'تتلقى الإخطارات في الوقت الحقيقي.',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      color: Colors.white,
-                                      shadows: [
-                                        Shadow(
-                                          blurRadius: 10.0,
-                                          color: Colors.black,
-                                          offset: Offset(3.0, 3.0),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+                            _buildFeatureRow(
+                                'تتلقى الإخطارات في الوقت الحقيقي.'),
                             SizedBox(height: 10),
-                            Row(
-                              children: [
-                                Icon(Icons.check_circle,
-                                    color: Colors.lightGreenAccent),
-                                SizedBox(width: 10),
-                                Expanded(
-                                  child: Text(
-                                    'يمكنك مراجعة تاريخ طلبك.',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      color: Colors.white,
-                                      shadows: [
-                                        Shadow(
-                                          blurRadius: 10.0,
-                                          color: Colors.black,
-                                          offset: Offset(3.0, 3.0),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+                            _buildFeatureRow('يمكنك مراجعة تاريخ طلبك.'),
                           ],
                         ),
                       ),
@@ -267,6 +192,31 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildFeatureRow(String text) {
+    return Row(
+      children: [
+        Icon(Icons.check_circle, color: Colors.lightGreenAccent),
+        SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 18,
+              color: Colors.white,
+              shadows: [
+                Shadow(
+                  blurRadius: 10.0,
+                  color: Colors.black,
+                  offset: Offset(3.0, 3.0),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
