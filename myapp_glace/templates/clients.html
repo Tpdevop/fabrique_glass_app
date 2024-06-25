@@ -2,7 +2,7 @@
 
 {% block content %}
 <h1>Clients</h1>
-<table>
+<table class="styled-table">
     <thead>
         <tr>
             <th>ID</th>
@@ -19,14 +19,14 @@
             <td>{{ client.nom }}</td>
             <td>{{ client.prenom }}</td>
             <td>{{ client.email }}</td>
-            <td>
-                <a href="{{ url_for('get_client', id=client._id) }}">Voir</a>
-                <a href="{{ url_for('edit_client', id=client._id) }}">Modifier</a>
-                <a href="{{ url_for('delete_client', id=client._id) }}">Supprimer</a>
+            <td class="actions">
+                <a href="{{ url_for('get_client', id=client._id) }}" class="action-button view">Voir</a>
+                <a href="{{ url_for('edit_client', id=client._id) }}" class="action-button edit">Modifier</a>
+                <a href="{{ url_for('delete_client', id=client._id) }}" class="action-button delete">Supprimer</a>
             </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
-<a href="{{ url_for('create_client') }}">Créer un nouveau client</a>
+<a href="{{ url_for('create_client') }}" class="create-button">Créer un nouveau client</a>
 {% endblock %}

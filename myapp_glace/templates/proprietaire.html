@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Détails du propriétaire</h1>
+<table class="styled-table">
+    <tr>
+        <th>ID</th>
+        <td>{{ proprietaire._id }}</td>
+    </tr>
+    <tr>
+        <th>Email</th>
+        <td>{{ proprietaire.email }}</td>
+    </tr>
+    <tr>
+        <th>ID Propriétaire</th>
+        <td>{{ proprietaire.ID_Proprietaire }}</td>
+    </tr>
+    <tr>
+        <th>Nom</th>
+        <td>{{ proprietaire.nom }}</td>
+    </tr>
+    <tr>
+        <th>Prénom</th>
+        <td>{{ proprietaire.prenom }}</td>
+    </tr>
+    <tr>
+        <th>Location</th>
+        <td>{{ proprietaire.location }}</td>
+    </tr>
+    <tr>
+        <th>Description</th>
+        <td>{{ proprietaire.description }}</td>
+    </tr>
+    <tr>
+        <th>Quantité</th>
+        <td>{{ proprietaire.quantite }}</td>
+    </tr>
+</table>
+<a href="{{ url_for('edit_proprietaire', id=proprietaire._id) }}" class="action-button edit">Modifier</a>
+<a href="{{ url_for('delete_proprietaire', id=proprietaire._id) }}" class="action-button delete">Supprimer</a>
+<a href="{{ url_for('get_proprietaires') }}" class="back-button">Retour à la liste des propriétaires</a>
+{% endblock %}

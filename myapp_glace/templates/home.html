@@ -1,6 +1,17 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Bienvenue à l'application de gestion des fabriques de glace</h1>
-<p>Utilisez la navigation pour gérer les entités.</p>
+<div class="home-header">
+    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo de l'application" class="logo">
+    <h1>Bienvenue à l'application de gestion des fabriques de glace</h1>
+</div>
+<div class="app-description">
+    <p>Cette application mobile vous permet de gérer efficacement les différentes entités de votre fabrique de glace. Voici quelques-unes de ses fonctionnalités principales :</p>
+    <ul>
+        <li><strong>Gestion des utilisateurs:</strong> Ajoutez, modifiez et supprimez les utilisateurs avec facilité.</li>
+        <li><strong>Gestion des clients:</strong> Gardez une trace détaillée de vos clients et de leurs informations.</li>
+        <li><strong>Gestion des propriétaires:</strong> Gérez les propriétaires et leurs propriétés en quelques clics.</li>
+        <li><strong>Gestion des demandes:</strong> Suivez et traitez les demandes de manière efficace.</li>
+    </ul>
+</div>
 {% endblock %}

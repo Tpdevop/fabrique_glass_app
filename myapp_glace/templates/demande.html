@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Demande</h1>
+<table class="styled-table">
+    <tr>
+        <th>ID</th>
+        <td>{{ demande._id }}</td>
+    </tr>
+    <tr>
+        <th>Client</th>
+        <td>{{ demande.client_info.nom }} {{ demande.client_info.prenom }} ({{ demande.client_info.email }})</td>
+    </tr>
+    <tr>
+        <th>Propriétaire</th>
+        <td>{{ demande.proprietaire_info.nom }} {{ demande.proprietaire_info.prenom }} ({{ demande.proprietaire_info.email }})</td>
+    </tr>
+    <tr>
+        <th>Quantité</th>
+        <td>{{ demande.quantite }} Kg</td>
+    </tr>
+    <tr>
+        <th>État</th>
+        <td>{{ demande.etat }}</td>
+    </tr>
+</table>
+<a href="{{ url_for('edit_demande', id=demande._id) }}" class="action-button edit">Modifier</a>
+<a href="{{ url_for('delete_demande', id=demande._id) }}" class="action-button delete">Supprimer</a>
+<a href="{{ url_for('get_demandes') }}" class="back-button">Retour à la liste des demandes</a>
+{% endblock %}

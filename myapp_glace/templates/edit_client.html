@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Modifier le client</h1>
+<form method="post" class="styled-form">
+    <div class="form-group">
+        <label for="email">Email:</label>
+        <select id="email" name="email" required>
+            {% for utilisateur in utilisateurs_clients %}
+            <option value="{{ utilisateur.email }}" {% if utilisateur.email == client.email %}selected{% endif %}>{{ utilisateur.email }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="nom">Nom:</label>
+        <input type="text" id="nom" name="nom" value="{{ client.nom }}" required>
+    </div>
+
+    <div class="form-group">
+        <label for="prenom">Prénom:</label>
+        <input type="text" id="prenom" name="prenom" value="{{ client.prenom }}" required>
+    </div>
+
+    <button type="submit" class="submit-button">Modifier</button>
+</form>
+<a href="{{ url_for('get_clients') }}" class="back-button">Retour à la liste des clients</a>
+{% endblock %}

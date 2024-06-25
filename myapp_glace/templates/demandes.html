@@ -2,12 +2,12 @@
 
 {% block content %}
 <h1>Demandes</h1>
-<table>
+<table class="styled-table">
     <thead>
         <tr>
             <th>ID</th>
-            <th>ID Client</th>
-            <th>ID Propriétaire</th>
+            <th>Client</th>
+            <th>Propriétaire</th>
             <th>Quantité</th>
             <th>État</th>
             <th>Actions</th>
@@ -17,18 +17,18 @@
         {% for demande in demandes %}
         <tr>
             <td>{{ demande._id }}</td>
-            <td>{{ demande.ID_Client }}</td>
-            <td>{{ demande.ID_Proprietaire }}</td>
-            <td>{{ demande.quantite }}</td>
+            <td>{{ demande.client_info.nom }} {{ demande.client_info.prenom }}</td>
+            <td>{{ demande.proprietaire_info.nom }} {{ demande.proprietaire_info.prenom }}</td>
+            <td>{{ demande.quantite }} Kg</td>
             <td>{{ demande.etat }}</td>
-            <td>
-                <a href="{{ url_for('get_demande', id=demande._id) }}">Voir</a>
-                <a href="{{ url_for('edit_demande', id=demande._id) }}">Modifier</a>
-                <a href="{{ url_for('delete_demande', id=demande._id) }}">Supprimer</a>
+            <td class="actions">
+                <a href="{{ url_for('get_demande', id=demande._id) }}" class="action-button view">Voir</a>
+                <a href="{{ url_for('edit_demande', id=demande._id) }}" class="action-button edit">Modifier</a>
+                <a href="{{ url_for('delete_demande', id=demande._id) }}" class="action-button delete">Supprimer</a>
             </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
-<a href="{{ url_for('create_demande') }}">Créer une nouvelle demande</a>
+<a href="{{ url_for('create_demande') }}" class="create-button">Créer une nouvelle demande</a>
 {% endblock %}
