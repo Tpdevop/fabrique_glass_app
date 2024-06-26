@@ -168,11 +168,14 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                           ));
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blueAccent,
+                          backgroundColor: Colors.deepPurpleAccent,
                           padding: EdgeInsets.symmetric(
                               horizontal: 30, vertical: 15),
-                          textStyle:
-                              TextStyle(fontSize: 18, color: Colors.white),
+                          textStyle: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30.0),
                           ),
@@ -181,7 +184,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         ),
                         child: Text(
                           'ابدأ الآن',
-                          style: TextStyle(color: Colors.white),
+                          style: GoogleFonts.tajawal(
+                            textStyle: TextStyle(
+                              color: Colors.white,
+                              fontSize: 22,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -198,21 +206,23 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   Widget _buildFeatureRow(String text) {
     return Row(
       children: [
-        Icon(Icons.check_circle, color: Colors.lightGreenAccent),
+        Icon(Icons.check_circle, color: Colors.lightGreenAccent, size: 30),
         SizedBox(width: 10),
         Expanded(
           child: Text(
             text,
-            style: TextStyle(
-              fontSize: 18,
-              color: Colors.white,
-              shadows: [
-                Shadow(
-                  blurRadius: 10.0,
-                  color: Colors.black,
-                  offset: Offset(3.0, 3.0),
-                ),
-              ],
+            style: GoogleFonts.almarai(
+              textStyle: TextStyle(
+                fontSize: 18,
+                color: Colors.white,
+                shadows: [
+                  Shadow(
+                    blurRadius: 10.0,
+                    color: Colors.black,
+                    offset: Offset(3.0, 3.0),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

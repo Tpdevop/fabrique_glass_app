@@ -1,7 +1,8 @@
-// ignore_for_file: prefer_const_constructors, sort_child_properties_last, prefer_const_literals_to_create_immutables
+// ignore_for_file: prefer_const_constructors, sort_child_properties_last
 
 import 'package:flutter/material.dart';
 import 'package:myapp/data/mongo_database.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class FactoryDetailsPage extends StatefulWidget {
   final int factoryId;
@@ -13,20 +14,27 @@ class FactoryDetailsPage extends StatefulWidget {
   _FactoryDetailsPageState createState() => _FactoryDetailsPageState();
 }
 
-class _FactoryDetailsPageState extends State<FactoryDetailsPage> {
+class _FactoryDetailsPageState extends State<FactoryDetailsPage>
+    with SingleTickerProviderStateMixin {
   late Future<Map<String, dynamic>> _factoryFuture;
   final _quantityController = TextEditingController();
   bool _isHovering = false;
+  late AnimationController _animationController;
 
   @override
   void initState() {
     super.initState();
     _factoryFuture = MongoDatabase.getFactoryById(widget.factoryId);
+    _animationController = AnimationController(
+      duration: const Duration(seconds: 1),
+      vsync: this,
+    );
   }
 
   @override
   void dispose() {
     _quantityController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -46,6 +54,11 @@ class _FactoryDetailsPageState extends State<FactoryDetailsPage> {
               Text('تم إرسال الطلب بنجاح!'),
             ],
           ),
+          backgroundColor: Colors.green[100],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
         ),
       );
       _quantityController.clear();
@@ -58,6 +71,11 @@ class _FactoryDetailsPageState extends State<FactoryDetailsPage> {
               SizedBox(width: 10),
               Text('الرجاء إدخال كمية صالحة.'),
             ],
+          ),
+          backgroundColor: Colors.red[100],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
           ),
         ),
       );
@@ -100,11 +118,14 @@ class _FactoryDetailsPageState extends State<FactoryDetailsPage> {
                   Icon(Icons.factory, color: Colors.blueAccent, size: 28),
                   SizedBox(width: 10),
                   Text(
-                    'اسم: ${factory['nom']}',
-                    style: TextStyle(
+                    'اسم المالك: ${factory['nom']}',
+                    style: GoogleFonts.cairo(
+                      textStyle: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
-                        fontFamily: 'Roboto'),
+                        color: Colors.blue[900],
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -115,10 +136,12 @@ class _FactoryDetailsPageState extends State<FactoryDetailsPage> {
                   SizedBox(width: 10),
                   Text(
                     'الموقع: ${factory['location']}',
-                    style: TextStyle(
+                    style: GoogleFonts.tajawal(
+                      textStyle: TextStyle(
                         fontSize: 18,
                         color: Colors.grey[700],
-                        fontFamily: 'Roboto'),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -130,10 +153,12 @@ class _FactoryDetailsPageState extends State<FactoryDetailsPage> {
                   Expanded(
                     child: Text(
                       'الوصف: ${factory['description']}',
-                      style: TextStyle(
+                      style: GoogleFonts.amiri(
+                        textStyle: TextStyle(
                           fontSize: 16,
                           color: Colors.grey[600],
-                          fontFamily: 'Roboto'),
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -143,7 +168,9 @@ class _FactoryDetailsPageState extends State<FactoryDetailsPage> {
                 controller: _quantityController,
                 decoration: InputDecoration(
                   labelText: 'كمية الجليد',
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
                   prefixIcon: Icon(Icons.numbers),
                 ),
                 keyboardType: TextInputType.number,
@@ -152,27 +179,70 @@ class _FactoryDetailsPageState extends State<FactoryDetailsPage> {
               MouseRegion(
                 onEnter: (_) => setState(() => _isHovering = true),
                 onExit: (_) => setState(() => _isHovering = false),
-                child: ElevatedButton(
+                child: OutlinedButton(
                   onPressed: () {
                     int quantity = int.tryParse(_quantityController.text) ?? 0;
                     _sendRequest(quantity, factory);
                   },
                   child: Text('إرسال الطلب'),
-                  style: ElevatedButton.styleFrom(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.white,
                     backgroundColor:
                         _isHovering ? Colors.orange[700] : Colors.orange,
-                    textStyle: TextStyle(
-                        fontWeight: FontWeight.bold, fontFamily: 'Roboto'),
+                    textStyle: GoogleFonts.lateef(
+                      textStyle: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                    ),
                     padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0),
                     ),
-                    shadowColor: Colors.black,
-                    elevation: 8.0,
+                    side: BorderSide(
+                      color: Colors.orange,
+                      width: 2.0,
+                    ),
                   ),
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorWidget(String error) {
+    return Center(
+      child: Text(
+        'خطأ: $error',
+        style: GoogleFonts.tajawal(
+          textStyle: TextStyle(
+            fontSize: 18,
+            color: Colors.red[800],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingWidget() {
+    return Center(
+      child: CircularProgressIndicator(
+        color: Colors.deepPurple[700],
+      ),
+    );
+  }
+
+  Widget _buildNoDataWidget() {
+    return Center(
+      child: Text(
+        'لم يتم العثور على بيانات.',
+        style: GoogleFonts.tajawal(
+          textStyle: TextStyle(
+            fontSize: 18,
+            color: Colors.grey[700],
           ),
         ),
       ),
@@ -185,8 +255,12 @@ class _FactoryDetailsPageState extends State<FactoryDetailsPage> {
       appBar: AppBar(
         title: Text(
           'تفاصيل المصنع',
-          style: TextStyle(
-              color: Colors.white, fontSize: 27.0, fontFamily: 'Roboto'),
+          style: GoogleFonts.cairo(
+            textStyle: TextStyle(
+              color: Colors.white,
+              fontSize: 27.0,
+            ),
+          ),
         ),
         backgroundColor: Colors.deepPurple[700],
         iconTheme: IconThemeData(
@@ -196,8 +270,7 @@ class _FactoryDetailsPageState extends State<FactoryDetailsPage> {
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage(
-                'images/background.png'), // Ensure you have a background image in assets
+            image: AssetImage('images/background.png'),
             fit: BoxFit.cover,
           ),
         ),
@@ -205,69 +278,18 @@ class _FactoryDetailsPageState extends State<FactoryDetailsPage> {
           future: _factoryFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
+              return _buildLoadingWidget();
             } else if (snapshot.hasError) {
-              return Center(child: Text('خطأ: ${snapshot.error}'));
+              return _buildErrorWidget(snapshot.error.toString());
             } else if (!snapshot.hasData) {
-              return Center(child: Text('لم يتم العثور على بيانات.'));
+              return _buildNoDataWidget();
             } else {
               final factory = snapshot.data!;
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 20),
-                  Text('Nom: ${factory['nom']}',
-                      style: TextStyle(fontSize: 20)),
-                  SizedBox(height: 10),
-                  Text('Emplacement: ${factory['location']}',
-                      style: TextStyle(fontSize: 18)),
-                  SizedBox(height: 10),
-                  Text('Description: ${factory['description']}',
-                      style: TextStyle(fontSize: 16)),
-                  SizedBox(height: 20),
-                  TextField(
-                    controller: _quantityController,
-                    decoration: InputDecoration(
-                      labelText: 'Quantité de glace',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
-                  ),
-                  SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () async {
-                      int quantity =
-                          int.tryParse(_quantityController.text) ?? 0;
-                      if (quantity > 0 && quantity <= factory['quantite']) {
-                        await MongoDatabase.sendRequest(
-                          widget.clientId,
-                          factory['ID_Proprietaire'],
-                          quantity,
-                        );
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text('Demande envoyée avec succès!')),
-                        );
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content:
-                                  Text('Veuillez entrer une quantité valide.')),
-                        );
-                      }
-                    },
-                    child: Text('Envoyer la demande'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
-                      textStyle: TextStyle(fontWeight: FontWeight.bold),
-                      padding:
-                          EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                    ),
-                  ),
-                ],
+              return SingleChildScrollView(
+                child: FadeTransition(
+                  opacity: _animationController..forward(),
+                  child: _buildFactoryDetails(factory),
+                ),
               );
             }
           },
