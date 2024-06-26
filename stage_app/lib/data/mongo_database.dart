@@ -280,16 +280,22 @@ class MongoDatabase {
     return true;
   }
 
-  // static Future<List<Map<String, dynamic>>> getFactoriesByProprietaireId(
-  //     String proprietaireId) async {
-  //   final db = await _openDb();
-  //   final factoryCollection = db.collection(Proprietaire_COLLECTION);
+  static Future<List<Map<String, dynamic>>> getRequestsByOwnerAndStatus(
+      int id, String status) async {
+    final db = await _openDb();
+    final collection1 = db.collection(Demande_COLLECTION);
 
-  //   final factories = await factoryCollection
-  //       .find(mongo.where.eq('ID_Proprietaire', proprietaireId))
-  //       .toList();
-  //   await closeDb(db);
+    final requests = await collection1
+        .find(mongo.where.eq('ID_Proprietaire', id).eq('etat', status))
+        .toList();
+    return requests;
+  }
 
-  //   return factories;
-  // }
+  static Future<Map<String, dynamic>> getUserById(int id) async {
+    final db = await _openDb();
+    final userCollection = db.collection(Client_COLLECTION);
+    final user = await userCollection.findOne(mongo.where.eq('ID_Client', id));
+    await closeDb(db);
+    return user ?? {};
+  }
 }
