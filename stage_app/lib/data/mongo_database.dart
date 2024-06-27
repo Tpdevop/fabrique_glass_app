@@ -298,4 +298,17 @@ class MongoDatabase {
     await closeDb(db);
     return user ?? {};
   }
+
+  static Future<void> updateOwnerQuantity(String email, int newQuantity) async {
+    var db = await mongo.Db.create(MONGO_URL);
+    await db.open();
+    var collection = db.collection(Proprietaire_COLLECTION);
+
+    await collection.update(
+      mongo.where.eq('email', email),
+      mongo.modify.set('quantite', newQuantity),
+    );
+
+    await db.close();
+  }
 }
