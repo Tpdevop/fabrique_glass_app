@@ -1,4 +1,6 @@
 // home_page.dart
+// ignore_for_file: prefer_const_constructors, use_build_context_synchronously, prefer_const_literals_to_create_immutables
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:myapp/auth/login.dart';
@@ -17,7 +19,8 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
+class _HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin {
   late Future<Map<String, dynamic>> _userFuture;
   late AnimationController _controller;
   late Animation<double> _animation;
@@ -50,7 +53,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   }
 
   Future<Map<String, dynamic>> _fetchUserData() async {
-    Map<String, dynamic> userData = await MongoDatabase.getUserByEmail(widget.userEmail);
+    Map<String, dynamic> userData =
+        await MongoDatabase.getUserByEmail(widget.userEmail);
     _userPhoto = userData['photo'] ?? '';
     return userData;
   }
@@ -84,61 +88,119 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     }
   }
 
-  void _showEditQuantityDialog(BuildContext context, int currentQuantity) {
+  void _showEditQuantityDialog(BuildContext context, int currentQuantity,
+      Function(int) onQuantityUpdated) {
     TextEditingController quantityController = TextEditingController();
+    String? errorMessage;
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Changer la quantité'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Quantité actuelle: $currentQuantity'),
-              TextField(
-                controller: quantityController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(hintText: "Entrez la nouvelle quantité"),
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
               ),
-            ],
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Annuler'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text('Confirmer'),
-              onPressed: () {
-                int? newQuantity = int.tryParse(quantityController.text);
-                if (newQuantity != null) {
-                  _updateQuantity(newQuantity);
-                  Navigator.of(context).pop();
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text('Veuillez entrer une quantité valide'),
-                  ));
-                }
-              },
-            ),
-          ],
+              title: Row(
+                children: [
+                  Icon(Icons.edit, color: Colors.deepPurple[700]),
+                  SizedBox(width: 10),
+                  Text(
+                    'تغيير كمية الثلج',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                  ),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'الكمية الحالية: $currentQuantity',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  SizedBox(height: 10),
+                  TextField(
+                    controller: quantityController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      prefixIcon:
+                          Icon(Icons.numbers, color: Colors.deepPurple[700]),
+                      hintText: "أدخل الكمية الجديدة",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                      ),
+                    ),
+                  ),
+                  if (errorMessage != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10.0),
+                      child: Text(
+                        errorMessage!,
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ),
+                ],
+              ),
+              actions: <Widget>[
+                ElevatedButton.icon(
+                  icon: Icon(Icons.cancel, color: Colors.white),
+                  label: Text('إلغاء'),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.red,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                ElevatedButton.icon(
+                  icon: Icon(Icons.check, color: Colors.white),
+                  label: Text('تأكيد'),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.green,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  ),
+                  onPressed: () {
+                    int? newQuantity = int.tryParse(quantityController.text);
+                    if (newQuantity != null) {
+                      _updateQuantity(newQuantity, onQuantityUpdated);
+                      Navigator.of(context).pop();
+                    } else {
+                      setState(() {
+                        errorMessage = 'الرجاء إدخال كمية صالحة';
+                      });
+                    }
+                  },
+                ),
+              ],
+            );
+          },
         );
       },
     );
   }
 
-  Future<void> _updateQuantity(int newQuantity) async {
+  Future<void> _updateQuantity(
+      int newQuantity, Function(int) onQuantityUpdated) async {
     try {
       await MongoDatabase.updateOwnerQuantity(widget.userEmail, newQuantity);
+      onQuantityUpdated(newQuantity);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Quantité mise à jour avec succès'),
+        content: Text('تم تحديث الكمية بنجاح'),
       ));
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Erreur lors de la mise à jour de la quantité : $e'),
+        content: Text('خطأ في تحديث الكمية: $e'),
       ));
     }
   }
@@ -148,7 +210,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text('الرئيسية', style: TextStyle(color: Colors.white, fontSize: 27.0)),
+        title: Text('الرئيسية',
+            style: TextStyle(color: Colors.white, fontSize: 27.0)),
         backgroundColor: Colors.deepPurple[700],
         actions: [
           if (widget.userType == 'proprietaire')
@@ -157,7 +220,15 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               onPressed: () async {
                 final userData = await _userFuture;
                 final currentQuantity = userData['quantite'] ?? 0;
-                _showEditQuantityDialog(context, currentQuantity);
+                _showEditQuantityDialog(context, currentQuantity,
+                    (newQuantity) {
+                  setState(() {
+                    _userFuture = Future.value({
+                      ...userData,
+                      'quantite': newQuantity,
+                    });
+                  });
+                });
               },
             ),
           IconButton(
@@ -167,7 +238,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         ],
         automaticallyImplyLeading: false,
       ),
-      endDrawer: DrawerContent(userFuture: _userFuture, userEmail: widget.userEmail, userPhoto: _userPhoto, pickImage: _pickImage, logout: _logout),
+      endDrawer: DrawerContent(
+          userFuture: _userFuture,
+          userEmail: widget.userEmail,
+          userPhoto: _userPhoto,
+          pickImage: _pickImage,
+          logout: _logout),
       body: Directionality(
         textDirection: TextDirection.rtl,
         child: Padding(
@@ -184,10 +260,25 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               } else {
                 final user = snapshot.data!;
                 if (widget.userType == 'client') {
-                  return ClientView(clientId: user['ID_Client'] ?? 0, animation: _animation, slideAnimation: _slideAnimation);
+                  return ClientView(
+                      clientId: user['ID_Client'] ?? 0,
+                      animation: _animation,
+                      slideAnimation: _slideAnimation);
                 } else if (widget.userType == 'proprietaire') {
-                  int currentQuantity = user['quantity'] ?? 0; // Assurez-vous que le champ 'quantity' existe dans les données utilisateur
-                  return ProprietaireView(ownerId: user['ID_Proprietaire'] ?? 0, animation: _animation, slideAnimation: _slideAnimation, selectedIndex: _selectedIndex, onItemTapped: _onItemTapped, onEditQuantity: () => _showEditQuantityDialog(context, currentQuantity));
+                  int currentQuantity = user['quantite'] ??
+                      0; // Assurez-vous que le champ 'quantite' existe dans les données utilisateur
+                  return ProprietaireView(
+                      ownerId: user['ID_Proprietaire'] ?? 0,
+                      animation: _animation,
+                      slideAnimation: _slideAnimation,
+                      selectedIndex: _selectedIndex,
+                      onItemTapped: _onItemTapped,
+                      onEditQuantity: () => _showEditQuantityDialog(
+                              context, currentQuantity, (newQuantity) {
+                            setState(() {
+                              user['quantite'] = newQuantity;
+                            });
+                          }));
                 } else {
                   return Center(child: Text('Type d\'utilisateur inconnu.'));
                 }
@@ -198,14 +289,28 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       ),
       bottomNavigationBar: widget.userType == 'proprietaire'
           ? BottomNavigationBar(
-              items: const <BottomNavigationBarItem>[
-                BottomNavigationBarItem(icon: Icon(Icons.cancel), label: 'مرفوضة'),
-                BottomNavigationBarItem(icon: Icon(Icons.check_circle), label: 'مقبولة'),
-                BottomNavigationBarItem(icon: Icon(Icons.pending), label: 'قيد الانتظار'),
-              ],
               currentIndex: _selectedIndex,
-              selectedItemColor: Colors.deepPurple[700],
               onTap: _onItemTapped,
+              backgroundColor: Colors.white,
+              selectedItemColor: Colors.deepPurple[700],
+              unselectedItemColor: Colors.grey,
+              selectedFontSize: 14,
+              unselectedFontSize: 12,
+              iconSize: 30,
+              items: [
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.cancel),
+                  label: 'الطلبات المرفوضة',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.check_circle),
+                  label: 'الطلبات المقبولة',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.pending),
+                  label: 'قيد الانتظار',
+                ),
+              ],
             )
           : null,
     );

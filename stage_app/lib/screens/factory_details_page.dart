@@ -117,13 +117,16 @@ class _FactoryDetailsPageState extends State<FactoryDetailsPage>
                 children: [
                   Icon(Icons.factory, color: Colors.blueAccent, size: 28),
                   SizedBox(width: 10),
-                  Text(
-                    'اسم المالك: ${factory['nom']}',
-                    style: GoogleFonts.cairo(
-                      textStyle: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue[900],
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      'اسم المالك: ${factory['nom']}',
+                      style: GoogleFonts.cairo(
+                        textStyle: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue[900],
+                        ),
                       ),
                     ),
                   ),

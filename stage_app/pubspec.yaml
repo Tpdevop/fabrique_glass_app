@@ -43,6 +43,9 @@ dependencies:
   carousel_slider: ^4.2.1
   image_picker: ^1.1.2
   shared_preferences: ^2.2.3
+  animated_bottom_navigation_bar: ^1.0.5
+  mockito: ^5.0.15
+  build_runner: ^2.1.7
 
 dev_dependencies:
   flutter_test:

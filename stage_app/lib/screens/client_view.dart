@@ -1,4 +1,6 @@
 // client_view.dart
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import 'package:myapp/data/mongo_database.dart';
 import 'package:myapp/screens/factory_card.dart';
